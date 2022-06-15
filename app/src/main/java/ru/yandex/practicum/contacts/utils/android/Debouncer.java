@@ -23,16 +23,22 @@ public class Debouncer {
         @Override
         public void handleMessage(@NonNull Message message) {
             if (message.what == MESSAGE_ID) {
-                viewModel.search();
+                doOnDebounce();
                 return;
             }
             super.handleMessage(message);
         }
     };
 
+    // метод отправляет сообщение, для обновления данных с задержкой в 500мс
     public void updateValue(String value) {
         final Message message = Message.obtain(handler, MESSAGE_ID, value);
         handler.removeMessages(MESSAGE_ID);
         handler.sendMessageDelayed(message, DELAY);
+    }
+
+    // выполнить действие по прошествии 500мс, если нового события в течении 500мс не было отправлено
+    private void doOnDebounce() {
+        viewModel.search();
     }
 }

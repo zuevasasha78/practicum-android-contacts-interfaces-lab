@@ -2,6 +2,8 @@ package ru.yandex.practicum.contacts.presentation.main;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +26,7 @@ import ru.yandex.practicum.contacts.presentation.main.model.MenuClick;
 import ru.yandex.practicum.contacts.presentation.sort.SortDialogFragment;
 import ru.yandex.practicum.contacts.presentation.sort.model.SortType;
 import ru.yandex.practicum.contacts.ui.widget.DividerItemDecoration;
+import ru.yandex.practicum.contacts.utils.android.Debouncer;
 import ru.yandex.practicum.contacts.utils.widget.EditTextUtils;
 
 import androidx.annotation.IdRes;
@@ -65,8 +68,9 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getUiStateLiveDate().observe(this, this::updateUiState);
 
         createBadges();
+        bindSearch();
         EditTextUtils.addTextListener(binding.searchLayout.searchText, query -> viewModel.updateSearchText(query.toString()));
-        EditTextUtils.debounce(binding.searchLayout.searchText, viewModel);
+
         binding.searchLayout.resetButton.setOnClickListener(view -> clearSearch());
 
         getSupportFragmentManager().setFragmentResultListener(SortDialogFragment.REQUEST_KEY, this, (requestKey, result) -> {
@@ -77,6 +81,24 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().setFragmentResultListener(FilterContactTypeDialogFragment.REQUEST_KEY, this, (requestKey, result) -> {
             final Set<ContactType> newFilterContactTypes = FilterContactTypeDialogFragment.from(result);
             viewModel.updateFilterContactTypes(newFilterContactTypes);
+        });
+    }
+
+    public void bindSearch() {
+        final Debouncer debouncer = new Debouncer(viewModel);
+        binding.searchLayout.searchText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                debouncer.updateValue(s.toString());
+            }
         });
     }
 
@@ -190,9 +212,5 @@ public class MainActivity extends AppCompatActivity {
     private void clearSearch() {
         binding.searchLayout.searchText.setText("");
         viewModel.search();
-    }
-
-    private void toast(@StringRes int res) {
-        Toast.makeText(this, res, Toast.LENGTH_SHORT).show();
     }
 }

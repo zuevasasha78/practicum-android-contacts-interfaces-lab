@@ -11,24 +11,6 @@ import ru.yandex.practicum.contacts.utils.android.Debouncer;
 
 public class EditTextUtils {
 
-    public static void debounce(EditText editText, MainViewModel viewModel) {
-        final Debouncer debouncer = new Debouncer(viewModel);
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                debouncer.updateValue(s.toString());
-            }
-        });
-    }
-
     public static void addTextListener(EditText editText, Consumer<Editable> consumer) {
         editText.addTextChangedListener(new TextWatcher() {
             @Override

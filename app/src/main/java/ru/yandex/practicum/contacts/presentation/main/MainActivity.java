@@ -7,7 +7,11 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
+
+import androidx.annotation.IdRes;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.BadgeUtils;
@@ -27,16 +31,11 @@ import ru.yandex.practicum.contacts.presentation.sort.SortDialogFragment;
 import ru.yandex.practicum.contacts.presentation.sort.model.SortType;
 import ru.yandex.practicum.contacts.ui.widget.DividerItemDecoration;
 import ru.yandex.practicum.contacts.utils.android.Debouncer;
+import ru.yandex.practicum.contacts.utils.android.OnDebounceListener;
 import ru.yandex.practicum.contacts.utils.widget.EditTextUtils;
 
-import androidx.annotation.IdRes;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.ViewModelProvider;
-
 @SuppressLint("UnsafeExperimentalUsageError")
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnDebounceListener {
 
     public static final String SORT_TAG = "SORT_TAG";
     public static final String FILTER_TAG = "FILTER_TAG";
@@ -60,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         binding.recycler.setAdapter(adapter);
 
         final DividerItemDecoration decoration = new DividerItemDecoration(this, R.drawable.item_decoration_72dp,
-                DividerItemDecoration.VERTICAL);
+            DividerItemDecoration.VERTICAL);
         binding.recycler.addItemDecoration(decoration);
 
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void bindSearch() {
-        final Debouncer debouncer = new Debouncer(viewModel);
+        final Debouncer debouncer = new Debouncer(this);
         binding.searchLayout.searchText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -212,5 +211,11 @@ public class MainActivity extends AppCompatActivity {
     private void clearSearch() {
         binding.searchLayout.searchText.setText("");
         viewModel.search();
+    }
+
+    @Override
+    public void doOnDebounce() {
+        viewModel.search();
+
     }
 }
